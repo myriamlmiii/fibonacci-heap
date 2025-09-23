@@ -1,52 +1,65 @@
+# scripts/demo_game.py
 from src.fibonacci_heap import FibonacciHeap
+try:
+    from scripts.visualization import LiveHeapVisualizer
+except Exception:
+    LiveHeapVisualizer = None  # still works without viz deps
 
 def main():
     H = FibonacciHeap()
-    next_id = 1            # assign a simple integer ID to each inserted node
-    nodes = {}             # id -> node handle (needed for decrease/delete)
+    next_id = 1
+    nodes = {}
     score = 0
 
-    print("=== Fibonacci Heap Demo ===")
+    viz_enabled = False
+    viz = None
+
+    print("=== Fibonacci Heap Demo (Live Viz Ready) ===")
     print("Commands:")
-    print("  insert X          -> insert number X (returns an id)")
-    print("  min               -> show the current minimum")
-    print("  merge             -> merge a small demo heap [42, 17]")
-    print("  extract           -> extract and print the current minimum")
-    print("  decrease ID NEW   -> decrease key of node with id=ID to NEW")
-    print("  delete ID         -> delete node with id=ID")
-    print("  list              -> list known node IDs and their current keys")
-    print("  score             -> show your score")
-    print("  quit              -> exit")
+    print("  insert X            -> insert number X (returns an id)")
+    print("  min                 -> show the current minimum")
+    print("  merge               -> merge a small demo heap [42, 17]")
+    print("  extract             -> extract and print the current minimum")
+    print("  decrease ID NEW     -> decrease key of node with id=ID to NEW")
+    print("  delete ID           -> delete node with id=ID")
+    print("  list                -> list known node IDs and their current keys")
+    print("  viz on/off          -> toggle live visualization (requires matplotlib+networkx)")
+    print("  visualize           -> draw one snapshot now")
+    print("  score               -> show your score")
+    print("  quit                -> exit")
     print("=================================")
 
+    def maybe_viz(subtitle=""):
+        nonlocal viz_enabled, viz
+        if not viz_enabled:
+            return
+        if LiveHeapVisualizer is None:
+            print("Visualization libraries not installed. Run: pip install networkx matplotlib")
+            return
+        if viz is None:
+            viz = LiveHeapVisualizer()
+        viz.update(H, subtitle=subtitle)
+
     def list_nodes():
-        # best-effort: show id->key for handles that still exist (not deleted/extracted)
         if not nodes:
             print("No tracked nodes (insert something).")
             return
-        lines = []
-        for nid, node in nodes.items():
-            # node may have been deleted/extracted; skip handles no longer in heap
-            if node.left is node and node.parent is None and H.min is None:
-                # heap empty; nothing to show
-                continue
+        print("Tracked nodes (id: key):")
+        # Best-effort list (deleted/extracted nodes will disappear gradually)
+        for nid, node in list(nodes.items()):
             try:
-                # if node is still linked, it will have a key
-                lines.append(f"{nid}: {node.key}")
+                _ = node.key  # may raise if node is gone (unlikely)
+                print(f"  {nid}: {node.key}")
             except Exception:
-                pass
-        if lines:
-            print("Tracked nodes:")
-            for ln in lines:
-                print(" ", ln)
-        else:
-            print("No tracked nodes currently in heap.")
+                nodes.pop(nid, None)
 
     while True:
         try:
             parts = input("> ").strip().split()
         except (EOFError, KeyboardInterrupt):
             print("\nExiting. Goodbye!")
+            if viz is not None:
+                viz.close()
             break
 
         if not parts:
@@ -66,12 +79,14 @@ def main():
             nodes[nid] = node
             print(f"Inserted {x} with id={nid}. Heap size = {H.n}")
             score += 1
+            maybe_viz("after insert")
 
         elif cmd == "min":
             try:
                 m = H.minimum()
                 print(f"Minimum = {m}")
                 score += 1
+                maybe_viz("after min")
             except IndexError:
                 print("Heap is empty.")
 
@@ -86,24 +101,15 @@ def main():
             except IndexError:
                 print("Heap is empty after merge (unexpected).")
             score += 2
+            maybe_viz("after merge")
 
         elif cmd == "extract":
             try:
                 val = H.extract_min()
                 print(f"extract_min -> {val}. Heap size = {H.n}")
                 score += 2
-                # best effort: remove any one tracked id that matches this key
-                # (keys can repeat; this is just for the demo)
-                to_delete = None
-                for nid, node in nodes.items():
-                    try:
-                        if node.key == val:
-                            to_delete = nid
-                            break
-                    except Exception:
-                        pass
-                if to_delete is not None:
-                    del nodes[to_delete]
+                # Cannot reliably map value->node id; leave nodes dict as-is.
+                maybe_viz("after extract_min")
             except IndexError:
                 print("Heap is empty.")
 
@@ -122,6 +128,7 @@ def main():
                 H.decrease_key(node, new_key)
                 print(f"decrease_key: id={nid} now has key={node.key}. New min={H.minimum()}")
                 score += 2
+                maybe_viz("after decrease_key")
             except ValueError as e:
                 print(f"Error: {e}")
             except Exception:
@@ -142,21 +149,53 @@ def main():
                 del nodes[nid]
                 print(f"Deleted node id={nid}. Heap size = {H.n}")
                 score += 2
+                maybe_viz("after delete")
             except Exception:
                 print("That node may no longer be in the heap.")
 
         elif cmd == "list":
             list_nodes()
 
+        elif cmd == "viz" and len(parts) == 2:
+            opt = parts[1].lower()
+            if opt == "on":
+                if LiveHeapVisualizer is None:
+                    print("Install: pip install networkx matplotlib")
+                else:
+                    viz_enabled = True
+                    if viz is None:
+                        viz = LiveHeapVisualizer()
+                    print("Live visualization ON.")
+                    maybe_viz("viz on")
+            elif opt == "off":
+                viz_enabled = False
+                if viz is not None:
+                    viz.close()
+                    viz = None
+                print("Live visualization OFF.")
+            else:
+                print("Usage: viz on | viz off")
+
+        elif cmd == "visualize":
+            if LiveHeapVisualizer is None:
+                print("Install: pip install networkx matplotlib")
+            else:
+                if viz is None:
+                    viz = LiveHeapVisualizer()
+                viz.update(H, subtitle="snapshot")
+
         elif cmd == "score":
             print(f"Score = {score}")
 
         elif cmd == "quit":
             print("Exiting. Goodbye!")
+            if viz is not None:
+                viz.close()
             break
 
         else:
-            print("Unknown command. Try: insert X | min | merge | extract | decrease ID NEW | delete ID | list | score | quit")
+            print("Unknown command. Try:\n"
+                  "  insert X | min | merge | extract | decrease ID NEW | delete ID | list | viz on | viz off | visualize | score | quit")
 
 if __name__ == "__main__":
     main()
