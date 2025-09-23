@@ -78,6 +78,42 @@ class FibonacciHeap:
     
     def _consolidate(self):
         """Combines trees of the same degree, so no roots have the same degree."""
+        # used to track nodes by degree
+        A = {} 
+
+        # put all root nodes in a list
+        root_nodes = [node for node in self._iterate_list(self.min)]
+
+        for i in root_nodes:
+            x = i
+            d = x.degree
+            
+            # while there is another node with the same degree
+            while d in A:
+                y = A[d] # get the node with the same degree
+                if y.key < x.key: # make sure x has the smaller key
+                    x, y = y, x
+                # merge the two trees, y becomes a child of x
+                self._heap_link(y, x)
+                # remove the entery of the degrees dictionary
+                del A[d]
+                # increse the number of childs of x, since we just added one
+                d += 1
+
+                A[d] = x  # add x to the dictionary with its new degree
+
+        # Rebuild the root list from roots in A, and find the new minimum
+        self.min = None
+        for node in A.values():
+            node.left = node.right = node  # Detach from any previous list
+            if self.min is None:
+                self.min = node
+            else:
+                # Insert node into the root list
+                self._insert_right(self.min, node)
+                # Update self.min if this node has a smaller key
+                if node.key < self.min.key:
+                    self.min = node
 
     def _heap_link(self, y, x):
         """"make node y a child of node x."""
