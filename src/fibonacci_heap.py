@@ -10,7 +10,6 @@ class Node:
         self.right = self
         self.mark = False
 
-
 class FibonacciHeap:
     def __init__(self):
         self.min = None
@@ -100,7 +99,7 @@ class FibonacciHeap:
                 # increse the number of childs of x, since we just added one
                 d += 1
 
-                A[d] = x  # add x to the dictionary with its new degree
+        A[d] = x  # add x to the dictionary with its new degree
 
         # Rebuild the root list from roots in A, and find the new minimum
         self.min = None
