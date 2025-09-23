@@ -43,7 +43,7 @@ class FibonacciHeap:
         self.n += other.n
     # ===== End of Meriem's part =====
 
-    # ===== Baren's part: extract_min + consolidate =====
+    # ===== Barend's part: extract_min + consolidate =====
     def extract_min(self):
         # If the heap is empty, raise an error
         if self.min is None:
@@ -52,22 +52,52 @@ class FibonacciHeap:
         # Store the minimum key to return later
         min_node = self.min
 
-        # check if min_node has children
+        # if node has children, add them to the root list
         if min_node.child is not None:
             # Add each child of min_node to the root list
-            start = min_node.child
-            while True:
-                next_node = start.right
-                self._root_add(start)
+            children = [child for child in self._iterate_list(min_node.child)]
+            for child in children:
+                self._root_add(child)
+                child.parent = None
 
-                # if we looped through all children break out of the loop
-                if next_node == min_node.child:
-                    break
-                start = next_node
+        # Remove min_node from the root list
+        self._remove_from_list(min_node)
+
+        # update self.min and consolidate
+        if min_node == min_node.right:  # only node in the root list
+            self.min = None
+        else:
+            self.min = min_node.right
+            self._consolidate()
+
+        # decrease the node count in heap
+        self.n -= 1
 
         # return the removed min_node
         return min_node.key
     
+    def _consolidate(self):
+        """Combines trees of the same degree, so no roots have the same degree."""
+
+    def _heap_link(self, y, x):
+        """"make node y a child of node x."""
+        # remove y from root list
+        self._remove_from_list(y)
+
+        # make y a child of x
+        y.left = y.right = y
+        if x.child is None:
+            x.child = y
+        else:
+            self._insert_right(x.child, y)
+        
+        # update parent, degree, and mark
+        y.parent = x
+        x.degree += 1
+        y.mark = False
+
+    # ===== End of Barend's part =====
+
     def delete(self, node):
         raise NotImplementedError
 
