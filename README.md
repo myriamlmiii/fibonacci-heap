@@ -5,7 +5,7 @@ This project implements a **Fibonacci Heap** (priority queue) in Python.
 
 ## Our team
 - **Meriem** — `insert`, `minimum`, `merge` + tests + demo  
-- **Baren** — `extract_min` + consolidate (+ tests)  
+- **Barend** — `extract_min` + consolidate (+ tests)  
 - **Harishman** — `decrease_key`, `_cut`, `_cascading_cut`, `delete` (+ tests)
 
 ### Install dependencies
