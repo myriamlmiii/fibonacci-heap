@@ -99,7 +99,7 @@ class FibonacciHeap:
                 # increse the number of childs of x, since we just added one
                 d += 1
 
-        A[d] = x  # add x to the dictionary with its new degree
+            A[d] = x  # add x to the dictionary with its new degree
 
         # Rebuild the root list from roots in A, and find the new minimum
         self.min = None
@@ -120,8 +120,8 @@ class FibonacciHeap:
         self._remove_from_list(y)
 
         # make y a child of x
-        y.left = y.right = y
         if x.child is None:
+            y.left = y.right = y
             x.child = y
         else:
             self._insert_right(x.child, y)
