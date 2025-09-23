@@ -10,6 +10,10 @@ This project implements a **Fibonacci Heap** (priority queue) in Python.
 
 ### Install dependencies
 pip install pytest
+pip install networkx matplotlib
+
+## Bonus: Live Visualization
+We added an optional live visualization using `matplotlib` + `networkx`.
 
 ## References 
 
