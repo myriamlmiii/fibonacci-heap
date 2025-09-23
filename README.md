@@ -27,3 +27,5 @@ Fredman, M. L., & Tarjan, R. E. (1987). Fibonacci heaps and their uses in improv
 
 MIT OpenCourseWare. (2018, June 20). *Fibonacci Heaps or How to invent an extremely clever data structure* [Video]. YouTube. https://www.youtube.com/watch?v=6JxvKfSV9Ns
 
+OpenAI. (2025). ChatGPT (September 2025 version) [Large language model]. https://chat.openai.com
+We used ChatGPT (OpenAI, 2025) to draft explanations, generate code scaffolding, and clarify analysis steps.
