@@ -44,11 +44,29 @@ class FibonacciHeap:
     # ===== End of Meriem's part =====
 
     def extract_min(self):
-        raise NotImplementedError
+        # If the heap is empty, raise an error
+        if self.min is None:
+            raise IndexError("empty heap")
+        
+        # Store the minimum key to return later
+        min_node = self.min
 
-    def decrease_key(self, node, new_key):
-        raise NotImplementedError
+        # check if min_node has children
+        if min_node.child is not None:
+            # Add each child of min_node to the root list
+            start = min_node.child
+            while True:
+                next_node = start.right
+                self._root_add(start)
 
+                # if we looped through all children break out of the loop
+                if next_node == min_node.child:
+                    break
+                start = next_node
+
+        # return the removed min_node
+        return min_node.key
+    
     def delete(self, node):
         raise NotImplementedError
 
