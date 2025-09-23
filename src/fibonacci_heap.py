@@ -43,6 +43,7 @@ class FibonacciHeap:
         self.n += other.n
     # ===== End of Meriem's part =====
 
+    # ===== Baren's part: extract_min + consolidate =====
     def extract_min(self):
         # If the heap is empty, raise an error
         if self.min is None:
@@ -71,6 +72,7 @@ class FibonacciHeap:
         raise NotImplementedError
 
     def _root_add(self, x):
+        """Add node x to the root list (next to self.min if exists)."""
         if self.min is None:
             x.left = x.right = x
         else:
@@ -99,3 +101,12 @@ class FibonacciHeap:
         b.left = a
         a_r.left = b_l
         b_l.right = a_r
+
+    @staticmethod
+    def _iterate_list(start):
+        """Yield nodes of a circular doubly linked list starting at 'start'."""
+        yield start
+        cur = start.right
+        while cur is not start:
+            yield cur
+            cur = cur.right
