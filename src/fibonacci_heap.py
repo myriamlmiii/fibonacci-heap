@@ -43,16 +43,144 @@ class FibonacciHeap:
         self.n += other.n
     # ===== End of Meriem's part =====
 
+    # ===== Baren's part: extract_min + consolidate =====
     def extract_min(self):
-        raise NotImplementedError
+        """Remove and return the minimum key. Amortized O(log n)."""
+        z = self.min
+        if z is None:
+            raise IndexError("empty heap")
 
-    def decrease_key(self, node, new_key):
-        raise NotImplementedError
+        # 1) Add z's children to root list
+        if z.child is not None:
+            children = list(self._iterate_list(z.child))
+            for x in children:
+                # detach from child list and move to root list
+                self._remove_from_list(x)
+                self._root_add(x)
+                x.parent = None
+                x.mark = False
+            z.child = None
+            z.degree = 0
 
-    def delete(self, node):
-        raise NotImplementedError
+        # 2) Remove z from the root list
+        if z.right is z:  # z was the only root
+            self.min = None
+        else:
+            nxt = z.right
+            self._remove_from_list(z)
+            self.min = nxt
+            # 3) Consolidate the root list
+            self._consolidate()
 
+        self.n -= 1
+        return z.key
+
+    def _consolidate(self):
+        """Link roots of the same degree until all root degrees are unique."""
+        # Collect current roots (snapshot)
+        roots = list(self._iterate_list(self.min))
+
+        # Upper bound for degree array: ~ floor(log_phi(n)) + 2
+        # Use a dynamic list and expand as needed.
+        A = []
+
+        def ensure_size(idx):
+            if idx >= len(A):
+                A.extend([None] * (idx + 1 - len(A)))
+
+        for w in roots:
+            x = w
+            d = x.degree
+            ensure_size(d)
+            while A[d] is not None:
+                y = A[d]
+                if y is x:
+                    break
+                # Make sure x has the smaller key
+                if y.key < x.key:
+                    x, y = y, x
+                # Link y under x
+                self._link(y, x)
+                A[d] = None
+                d = x.degree
+                ensure_size(d)
+            A[d] = x
+
+        # Rebuild root list and find new min
+        self.min = None
+        # Clear all root list pointers and rebuild by adding each A[i]
+        for a in A:
+            if a is not None:
+                # isolate a before adding
+                a.left = a.right = a
+                a.parent = None
+                a.mark = False
+                if self.min is None:
+                    self.min = a
+                else:
+                    self._root_add(a)
+                    if a.key < self.min.key:
+                        self.min = a
+
+    def _link(self, y, x):
+        """Make y a child of x (assumes x.key <= y.key)."""
+        # y is currently in root list; remove it
+        self._remove_from_list(y)
+        # Add y to x's child list
+        if x.child is None:
+            y.left = y.right = y
+            x.child = y
+        else:
+            self._insert_right(x.child, y)
+        y.parent = x
+        y.mark = False
+        x.degree += 1
+    # ===== End of Baren's part =====
+
+    # ===== Harishman's part: decrease_key, cut, cascading_cut, delete =====
+    def decrease_key(self, x, new_key):
+        """Decrease node x's key to new_key. Amortized O(1)."""
+        if new_key > x.key:
+            raise ValueError("new_key must be <= current key")
+        x.key = new_key
+        y = x.parent
+        if y is not None and x.key < y.key:
+            self._cut(x, y)
+            self._cascading_cut(y)
+        if self.min is None or x.key < self.min.key:
+            self.min = x
+
+    def delete(self, x):
+        """Delete node x. Amortized O(log n)."""
+        self.decrease_key(x, float("-inf"))
+        self.extract_min()
+
+    def _cut(self, x, y):
+        """Remove x from y's child list and add x to root list."""
+        # detach x from child list
+        self._remove_from_list(x)
+        if y.child is x:
+            y.child = x.right if x.right is not x else None
+        y.degree -= 1
+        # add x to root list
+        self._root_add(x)
+        x.parent = None
+        x.mark = False
+
+    def _cascading_cut(self, y):
+        """Perform cascading cuts up the tree."""
+        z = y.parent
+        if z is not None:
+            if not y.mark:
+                y.mark = True
+            else:
+                self._cut(y, z)
+                self._cascading_cut(z)
+    # ===== End of Harishman's part =====
+
+    # ========== Internal helpers (lists / iteration) ==========
     def _root_add(self, x):
+        """Add node x to the root list (next to self.min if exists)."""
         if self.min is None:
             x.left = x.right = x
         else:
@@ -81,3 +209,12 @@ class FibonacciHeap:
         b.left = a
         a_r.left = b_l
         b_l.right = a_r
+
+    @staticmethod
+    def _iterate_list(start):
+        """Yield nodes of a circular doubly linked list starting at 'start'."""
+        yield start
+        cur = start.right
+        while cur is not start:
+            yield cur
+            cur = cur.right
