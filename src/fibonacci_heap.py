@@ -16,6 +16,7 @@ class FibonacciHeap:
         self.min = None
         self.n = 0
 
+    # ===== Meriem's part =====
     def insert(self, key):
         x = Node(key)
         self._root_add(x)
@@ -40,6 +41,7 @@ class FibonacciHeap:
         if other.min.key < self.min.key:
             self.min = other.min
         self.n += other.n
+    # ===== End of Meriem's part =====
 
     def extract_min(self):
         raise NotImplementedError
