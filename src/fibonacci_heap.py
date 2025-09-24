@@ -57,16 +57,16 @@ class FibonacciHeap:
         if min_node.child is not None:
             # add each child of min_node to root list
             children = list(self._iterate_list(min_node.child))
-            for x in children:
+            for child in children:
                 # detach from child list and move to root list
-                self._remove_from_list(x)
-                self._root_add(x)
-                x.parent = None
-                x.mark = False
+                self._remove_from_list(child)
+                self._root_add(child)
+                child.parent = None
+                child.mark = False
             min_node.child = None
             min_node.degree = 0
 
-        # 2) Remove min_node from the root list
+        # Remove min_node from the root list
         if min_node.right is min_node:  # min_node was the only root
             self.min = None
         else:
@@ -143,7 +143,6 @@ class FibonacciHeap:
         if x.child is None:
             y.left = y.right = y
             x.child = y
-        
         else:
             self._insert_right(x.child, y)
 
