@@ -43,42 +43,50 @@ class FibonacciHeap:
         self.n += other.n
     # ===== End of Meriem's part =====
 
-    # ===== Baren's part: extract_min + consolidate =====
+    # ===== Barend's part: extract_min, consolidate and link_heap =====
     def extract_min(self):
-        """Remove and return the minimum key. Amortized O(log n)."""
-        z = self.min
-        if z is None:
+        """Remove the minimum key and return it. \n Amortized O(log n)."""
+        # save min node to return later
+        min_node = self.min
+
+        # if heap is empty, raise error, not possible to extract
+        if min_node is None:
             raise IndexError("empty heap")
 
-        # 1) Add z's children to root list
-        if z.child is not None:
-            children = list(self._iterate_list(z.child))
-            for x in children:
+        # if node has children, add them to root list
+        if min_node.child is not None:
+            # add each child of min_node to root list
+            children = list(self._iterate_list(min_node.child))
+            for child in children:
                 # detach from child list and move to root list
-                self._remove_from_list(x)
-                self._root_add(x)
-                x.parent = None
-                x.mark = False
-            z.child = None
-            z.degree = 0
+                self._remove_from_list(child)
+                self._root_add(child)
+                child.parent = None
+                child.mark = False
+            min_node.child = None
+            min_node.degree = 0
 
-        # 2) Remove z from the root list
-        if z.right is z:  # z was the only root
+        # Remove min_node from the root list
+        if min_node.right is min_node:  # min_node was the only root
             self.min = None
         else:
-            nxt = z.right
-            self._remove_from_list(z)
+            nxt = min_node.right
+            self._remove_from_list(min_node)
             self.min = nxt
-            # 3) Consolidate the root list
+            
+            # Consolidate trees in root list so its cleaned up again
             self._consolidate()
 
+        # decrease node count in heap since we removed min_node
         self.n -= 1
-        return z.key
+
+        # return the key of the removed min_node
+        return min_node.key
 
     def _consolidate(self):
-        """Link roots of the same degree until all root degrees are unique."""
-        # Collect current roots (snapshot)
-        roots = list(self._iterate_list(self.min))
+        """Combines trees of the same degree, so no roots have the same degree"""
+        # put all current roots in a list
+        root_nodes = [node for node in self._iterate_list(self.min)]
 
         # Upper bound for degree array: ~ floor(log_phi(n)) + 2
         # Use a dynamic list and expand as needed.
@@ -88,54 +96,62 @@ class FibonacciHeap:
             if idx >= len(A):
                 A.extend([None] * (idx + 1 - len(A)))
 
-        for w in roots:
-            x = w
+        for i in root_nodes:
+            x = i
             d = x.degree
+
             ensure_size(d)
+
+            # while there is another node with the same degree
             while A[d] is not None:
-                y = A[d]
-                if y is x:
+                y = A[d] # get the node with the same degree
+                if y is x: 
                     break
                 # Make sure x has the smaller key
                 if y.key < x.key:
                     x, y = y, x
-                # Link y under x
-                self._link(y, x)
+                # Make y a child of x
+                self._heap_link(y, x)
+
                 A[d] = None
                 d = x.degree
                 ensure_size(d)
             A[d] = x
 
-        # Rebuild root list and find new min
+        # Rebuild the root from roots in A, and find the new minimum
         self.min = None
         # Clear all root list pointers and rebuild by adding each A[i]
-        for a in A:
-            if a is not None:
+        for node in A:
+            if node is not None:
                 # isolate a before adding
-                a.left = a.right = a
-                a.parent = None
-                a.mark = False
+                node.left = node.right = node
+                node.parent = None
+                node.mark = False
                 if self.min is None:
-                    self.min = a
+                    self.min = node
                 else:
-                    self._root_add(a)
-                    if a.key < self.min.key:
-                        self.min = a
+                    self._root_add(node)
+                    if node.key < self.min.key:
+                        self.min = node
 
-    def _link(self, y, x):
-        """Make y a child of x (assumes x.key <= y.key)."""
-        # y is currently in root list; remove it
+    def _heap_link(self, y, x):
+        """make node y a child of node x"""
+        # remove y from root list
         self._remove_from_list(y)
-        # Add y to x's child list
+
+        # add y to child list of x
         if x.child is None:
             y.left = y.right = y
             x.child = y
         else:
             self._insert_right(x.child, y)
+
+        # update parent degree and mark
         y.parent = x
         y.mark = False
         x.degree += 1
-    # ===== End of Baren's part =====
+
+    # ===== End of Barend's part =====
 
     # ===== Harishman's part: decrease_key, cut, cascading_cut, delete =====
     def decrease_key(self, x, new_key):
