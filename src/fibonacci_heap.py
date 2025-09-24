@@ -43,9 +43,9 @@ class FibonacciHeap:
         self.n += other.n
     # ===== End of Meriem's part =====
 
-    # ===== Baren's part: extract_min + consolidate =====
+    # ===== Barend's part: extract_min + consolidate =====
     def extract_min(self):
-        """Remove and return the minimum key. Amortized O(log n)."""
+        """Remove and return the minimum key,  Amortized O(log n)."""
         z = self.min
         if z is None:
             raise IndexError("empty heap")
@@ -100,7 +100,7 @@ class FibonacciHeap:
                 if y.key < x.key:
                     x, y = y, x
                 # Link y under x
-                self._link(y, x)
+                self._heap_link(y, x)
                 A[d] = None
                 d = x.degree
                 ensure_size(d)
@@ -122,20 +122,25 @@ class FibonacciHeap:
                     if a.key < self.min.key:
                         self.min = a
 
-    def _link(self, y, x):
-        """Make y a child of x (assumes x.key <= y.key)."""
-        # y is currently in root list; remove it
+    def _heap_link(self, y, x):
+        """make node y a child of node x"""
+        # remove y from root list
         self._remove_from_list(y)
-        # Add y to x's child list
+
+        # add y to child list of x
         if x.child is None:
             y.left = y.right = y
             x.child = y
+        
         else:
             self._insert_right(x.child, y)
+
+        # update parent degree and mark
         y.parent = x
         y.mark = False
         x.degree += 1
-    # ===== End of Baren's part =====
+
+    # ===== End of Barend's part =====
 
     # ===== Harishman's part: decrease_key, cut, cascading_cut, delete =====
     def decrease_key(self, x, new_key):
