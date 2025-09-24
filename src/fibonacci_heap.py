@@ -43,7 +43,7 @@ class FibonacciHeap:
         self.n += other.n
     # ===== End of Meriem's part =====
 
-    # ===== Barend's part: extract_min + consolidate =====
+    # ===== Barend's part: extract_min, consolidate and link_heap =====
     def extract_min(self):
         """Remove the minimum key and return it. \n Amortized O(log n)."""
         # save min node to return later
