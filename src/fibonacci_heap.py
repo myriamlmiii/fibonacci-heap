@@ -45,40 +45,40 @@ class FibonacciHeap:
 
     # ===== Barend's part: extract_min + consolidate =====
     def extract_min(self):
-        """Remove and return the minimum key,  Amortized O(log n)."""
-        z = self.min
-        if z is None:
+        """Remove the minimum key and return it. \n Amortized O(log n)."""
+        min_node = self.min
+        if min_node is None:
             raise IndexError("empty heap")
 
-        # 1) Add z's children to root list
-        if z.child is not None:
-            children = list(self._iterate_list(z.child))
+        # 1) Add min_node's children to root list
+        if min_node.child is not None:
+            children = list(self._iterate_list(min_node.child))
             for x in children:
                 # detach from child list and move to root list
                 self._remove_from_list(x)
                 self._root_add(x)
                 x.parent = None
                 x.mark = False
-            z.child = None
-            z.degree = 0
+            min_node.child = None
+            min_node.degree = 0
 
-        # 2) Remove z from the root list
-        if z.right is z:  # z was the only root
+        # 2) Remove min_node from the root list
+        if min_node.right is min_node:  # min_node was the only root
             self.min = None
         else:
-            nxt = z.right
-            self._remove_from_list(z)
+            nxt = min_node.right
+            self._remove_from_list(min_node)
             self.min = nxt
             # 3) Consolidate the root list
             self._consolidate()
 
         self.n -= 1
-        return z.key
+        return min_node.key
 
     def _consolidate(self):
-        """Link roots of the same degree until all root degrees are unique."""
-        # Collect current roots (snapshot)
-        roots = list(self._iterate_list(self.min))
+        """Combines trees of the same degree, so no roots have the same degree"""
+        # put all current roots in a list
+        root_nodes = [node for node in self._iterate_list(self.min)]
 
         # Upper bound for degree array: ~ floor(log_phi(n)) + 2
         # Use a dynamic list and expand as needed.
@@ -88,39 +88,43 @@ class FibonacciHeap:
             if idx >= len(A):
                 A.extend([None] * (idx + 1 - len(A)))
 
-        for w in roots:
-            x = w
+        for i in root_nodes:
+            x = i
             d = x.degree
+
             ensure_size(d)
+
+            # while there is another node with the same degree
             while A[d] is not None:
-                y = A[d]
-                if y is x:
+                y = A[d] # get the node with the same degree
+                if y is x: 
                     break
                 # Make sure x has the smaller key
                 if y.key < x.key:
                     x, y = y, x
-                # Link y under x
+                # Make y a child of x
                 self._heap_link(y, x)
+
                 A[d] = None
                 d = x.degree
                 ensure_size(d)
             A[d] = x
 
-        # Rebuild root list and find new min
+        # Rebuild the root from roots in A, and find the new minimum
         self.min = None
         # Clear all root list pointers and rebuild by adding each A[i]
-        for a in A:
-            if a is not None:
+        for node in A:
+            if node is not None:
                 # isolate a before adding
-                a.left = a.right = a
-                a.parent = None
-                a.mark = False
+                node.left = node.right = node
+                node.parent = None
+                node.mark = False
                 if self.min is None:
-                    self.min = a
+                    self.min = node
                 else:
-                    self._root_add(a)
-                    if a.key < self.min.key:
-                        self.min = a
+                    self._root_add(node)
+                    if node.key < self.min.key:
+                        self.min = node
 
     def _heap_link(self, y, x):
         """make node y a child of node x"""
