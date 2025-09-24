@@ -96,7 +96,7 @@ Let `D(n)` be the maximum degree of any node in an `n`-node Fibonacci Heap.
 
 ## What Each Teammate’s Part Contributes to the Analysis
 - **Meriem**: `insert`, `minimum`, `merge` → O(1) operations that manipulate the root list and maintain `min`.
-- **Baren**: `extract_min` + **consolidation** → where the O(log n) work occurs; uses the degree bound above.
+- **Barend**: `extract_min` + **consolidation** → where the O(log n) work occurs; uses the degree bound above.
 - **Harishman**: `decrease_key`, `_cut`, `_cascading_cut`, `delete` → O(1) amortized for `decrease_key` (via marks + potential), O(log n) for `delete`.
 
 ---
