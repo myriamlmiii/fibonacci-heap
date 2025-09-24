@@ -46,12 +46,16 @@ class FibonacciHeap:
     # ===== Barend's part: extract_min + consolidate =====
     def extract_min(self):
         """Remove the minimum key and return it. \n Amortized O(log n)."""
+        # save min node to return later
         min_node = self.min
+
+        # if heap is empty, raise error, not possible to extract
         if min_node is None:
             raise IndexError("empty heap")
 
-        # 1) Add min_node's children to root list
+        # if node has children, add them to root list
         if min_node.child is not None:
+            # add each child of min_node to root list
             children = list(self._iterate_list(min_node.child))
             for x in children:
                 # detach from child list and move to root list
@@ -69,10 +73,14 @@ class FibonacciHeap:
             nxt = min_node.right
             self._remove_from_list(min_node)
             self.min = nxt
-            # 3) Consolidate the root list
+            
+            # Consolidate trees in root list so its cleaned up again
             self._consolidate()
 
+        # decrease node count in heap since we removed min_node
         self.n -= 1
+
+        # return the key of the removed min_node
         return min_node.key
 
     def _consolidate(self):
