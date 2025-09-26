@@ -4,6 +4,8 @@ This project implements a **Fibonacci Heap** (priority queue) in Python.
 > Note: This is the *data structure*, not the Fibonacci number sequence.
 
 
+📍 Developed as part of the **Analysis and Algorithms** class at **University of the Fraser Valley (UFV)**.
+
 ## Our team
 - **Meriem** — `insert`, `minimum`, `merge` + tests + demo  
 - **Barend** — `extract_min` + `consolidate`, `heap_link` (+ tests)  
