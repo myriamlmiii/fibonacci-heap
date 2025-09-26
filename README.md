@@ -3,10 +3,11 @@
 This project implements a **Fibonacci Heap** (priority queue) in Python.  
 > Note: This is the *data structure*, not the Fibonacci number sequence.
 
+
 ## Our team
 - **Meriem** — `insert`, `minimum`, `merge` + tests + demo  
 - **Barend** — `extract_min` + `consolidate`, `heap_link` (+ tests)  
-- **Harishman** — `decrease_key`, `_cut`, `_cascading_cut`, `delete` (+ tests)
+- **Meriem** — `decrease_key`, `_cut`, `_cascading_cut`, `delete` (+ tests)
 
 ### Install dependencies
 pip install pytest
