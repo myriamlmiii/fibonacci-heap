@@ -1,16 +1,23 @@
-# Fibonacci Heap 
+# Fibonacci Heap – Python Implementation
 
-This project implements a **Fibonacci Heap** (priority queue) in Python.  
-> Note: This is the *data structure*, not the Fibonacci number sequence.
+This project implements a **Fibonacci Heap (priority queue)** in Python for efficient priority queue operations.  
+*(Note: this is the **data structure**, not the Fibonacci number sequence.)*
 
+📍 Developed as part of the **Analysis and Algorithms** class at **University of the Fraser Valley (UFV)**.  
 
-📍 Developed as part of the **Analysis and Algorithms** class at **University of the Fraser Valley (UFV)**.
+---
 
-## Our team
-- **Meriem** — `insert`, `minimum`, `merge` + tests + demo  
-- **Barend** — `extract_min` + `consolidate`, `heap_link` (+ tests)  
-- **Meriem** — `decrease_key`, `_cut`, `_cascading_cut`, `delete` (+ tests)
+## 📂 Documentation
+- [`docs/analysis.md`](./docs/analysis.md) → Complexity analysis, design trade-offs  
+- [`docs/decision.md`](./docs/decision.md) → Design decisions, algorithmic choices  
 
+---
+
+## 👩‍💻 Our team
+- **Meriem** — insert, minimum, merge + tests + demo; decrease_key, _cut, _cascading_cut, delete (+ tests)  
+- **Barend** — extract_min + consolidate, heap_link (+ tests)  
+
+---
 ### Install dependencies
 pip install pytest
 pip install networkx matplotlib
